@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponse, redirect
-from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 import pyodbc
@@ -35,28 +35,23 @@ def SignupPage(request):
             return redirect('login')
 
     return render(request, 'signup.html')
+
 def LoginPage(request):
     if request.method == 'POST':
         username = request.POST.get('uname')
-        pass1 = request.POST.get('pass1')
+        password = request.POST.get('pass1')
 
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM stdlogin WHERE uname = ? AND pass1 = ?", (username, pass1))
-        user_data = cursor.fetchone()
+        cursor.execute("SELECT COUNT(*) FROM stdlogin WHERE uname = ? AND pass1 = ?", (username, password))
+        result = cursor.fetchone()
 
-        if user_data is not None:
-            user = User.objects.get(username=username)
-            login(request, user)
-            return redirect('home')
+        if result[0] == 1:
+            return HttpResponse("<center><h1>You are logged in to the device</h1></center>") # Redirect to home page or any other desired page
         else:
-            return HttpResponse("Username or Password is incorrect!!!")
+            return HttpResponse("Invalid username or password!")
 
     return render(request, 'login.html')
 def LogoutPage(request):
     logout(request)
     return redirect('login')
-
-
-
-
 
